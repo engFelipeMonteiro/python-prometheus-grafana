@@ -1,7 +1,7 @@
 from flask import Response, Flask, request
 import prometheus_client
 # from prometheus_client.core import CollectorRegistry
-from prometheus_client import Summary, Counter, Histogram, Gauge, Info
+from prometheus_client import Summary, Counter, Histogram, Gauge, Info, REGISTRY
 import random
 
 import time
@@ -31,9 +31,24 @@ def index():
 @app.route("/metrics")
 def requests_count():
     res = []
-    for k,v in graphs.items():
-        res.append(prometheus_client.generate_latest(v))
+    res.append(prometheus_client.generate_latest(REGISTRY))
     return Response(res, mimetype="text/plain")
+
+@app.route("/metrics/<metric_name>")
+def get_metric_report(metric_name):
+    res = []
+    error=False
+    #import pdb; pdb.set_trace()
+    try:
+        metric = REGISTRY._names_to_collectors[metric_name]
+    except KeyError:
+        res = ['metrica not found']
+        error = True
+    if not error:
+        res.append(prometheus_client.generate_latest(metric))
+    
+    return Response(res, mimetype="text/plain")
+
 
 if __name__ == "__main__":
     app.run(
