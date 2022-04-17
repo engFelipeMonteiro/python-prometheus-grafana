@@ -10,4 +10,4 @@ scrape_configs:
     # scrape_interval: 5s
     static_configs:
       - targets: 
-        - 'api1:5000'
+        - 'api_1:5000'
